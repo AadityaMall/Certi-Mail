@@ -17,15 +17,15 @@ const sendEmailWithAttachment = async (recipientEmail, pdfBuffer) => {
     const mailOptions = {
       from: process.env.SMPT_MAIL, // Sender address
       to: recipientEmail, // Recipient address
-      subject: "Your Certificate", // Email subject
-      text: "Please find your certificate attached.", // Email body
-        attachments: [
-          {
-            filename: "certificate.pdf", // Attachment name
-            content: pdfBuffer, // PDF file buffer
-            contentType: "application/pdf",
-          },
-        ],
+      subject: "IET MPSTME Certificate", // Email subject
+      text: "We are excited to share that your IET MPSTME Certificate is now ready. Attached to this email, you will find your certificate acknowledging your tenure with IET MPSTME on Campus.\n\nThank you for being a valued member of our community. We look forward to your continued involvement in our events and activities. \n\nBest regards, \nIET MPSTME on Campus", // Email body
+      attachments: [
+        {
+          filename: "certificate.pdf", // Attachment name
+          content: pdfBuffer, // PDF file buffer
+          contentType: "application/pdf",
+        },
+      ],
     };
 
     // Send the email
@@ -127,8 +127,7 @@ async function generateSuperCoreCertificate(name, designation, designPath) {
   console.log("PDF generation function called");
 
   // Read the existing PDF template
-  const existingPdfBytes = fs.readFileSync(designPath); // Make sure this is a PDF file
-  const pdfDoc = await PDFDocument.load(existingPdfBytes); // Load the PDF template
+  const pdfDoc = await PDFDocument.load(designPath); // Load the PDF template
   pdfDoc.registerFontkit(fontkit);
 
   const execFontBytes = fs.readFileSync("./Fonts/PinyonScript-Regular.ttf"); // Path to your custom font file
