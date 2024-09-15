@@ -21,11 +21,15 @@ app.post('/upload', upload.fields([{ name: 'excelFile' }, { name: 'certificateDe
     const data = xlsx.utils.sheet_to_json(sheet);
 
     for (const row of data) {
+      console.log(row);
       const name = row['Name'];
       const email = row['Email'];
-      const designation = row['Designation'];
+      // const designation = row['Designation'];
+      const department = row['Department']
       // Generate certificate using the buffer for the design template
-      const pdfBuffer = await generateSuperCoreCertificate(name, designation, designBuffer); 
+      // const pdfBuffer = await generateCoreCertificate(name,department, designation, designBuffer); 
+      const pdfBuffer = await generateExecutiveCertificate(name,department, designBuffer); 
+
       await sendEmailWithAttachment(email, pdfBuffer);
     }
 

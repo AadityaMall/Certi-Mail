@@ -39,8 +39,7 @@ async function generateExecutiveCertificate(name, department, designPath) {
   console.log("PDF generation function called");
 
   // Read the existing PDF template
-  const existingPdfBytes = fs.readFileSync(designPath); // Make sure this is a PDF file
-  const pdfDoc = await PDFDocument.load(existingPdfBytes); // Load the PDF template
+  const pdfDoc = await PDFDocument.load(designPath); // Load the PDF template
   pdfDoc.registerFontkit(fontkit);
 
   const execFontBytes = fs.readFileSync("./Fonts/PinyonScript-Regular.ttf"); // Path to your custom font file
@@ -85,8 +84,7 @@ async function generateCoreCertificate(
   console.log("PDF generation function called");
 
   // Read the existing PDF template
-  const existingPdfBytes = fs.readFileSync(designPath); // Make sure this is a PDF file
-  const pdfDoc = await PDFDocument.load(existingPdfBytes); // Load the PDF template
+  const pdfDoc = await PDFDocument.load(designPath); // Load the PDF template
   pdfDoc.registerFontkit(fontkit);
 
   const execFontBytes = fs.readFileSync("./Fonts/PinyonScript-Regular.ttf"); // Path to your custom font file
