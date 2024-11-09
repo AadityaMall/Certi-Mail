@@ -163,35 +163,35 @@ async function generateSuperCoreCertificate(name, designation, designPath) {
   // Return the PDF bytes if needed for further processing
   return pdfBytes;
 }
-async function generateEventCertificates(name, designPath) {
+async function generateEventCertificates(name, designPath, fontUrl) {
   console.log("PDF generation function called");
 
-  // Read the existing PDF template
-  const pdfDoc = await PDFDocument.load(designPath); // Load the PDF template
+  // Download the font file
+  const fontResponse = await axios.get(fontUrl, { responseType: 'arraybuffer' });
+  const fontBytes = fontResponse.data;
+
+  // Load the PDF template and register the font
+  const pdfDoc = await PDFDocument.load(fs.readFileSync(designPath));
   pdfDoc.registerFontkit(fontkit);
+  const participantFont = await pdfDoc.embedFont(fontBytes);
 
-  const participantFontBytes = fs.readFileSync("./Fonts/AnastasiaScript.ttf"); // Path to your custom font file
-  const participantFont = await pdfDoc.embedFont(participantFontBytes); // Embed the custom font
-
-  
   const pages = pdfDoc.getPages();
-  const firstPage = pages[0]; // Use the first page for modifications (modify this if needed)
+  const firstPage = pages[0];
 
-  // Add text to the existing page
+  // Draw text with the selected font
   firstPage.drawText(`${name}`, {
-    x: 240, // Adjust the x position as per your template layout
-    y: 215, // Adjust the y position as per your template layout
+    x: 240,
+    y: 215,
     size: 35,
     font: participantFont,
-    color: rgb(1,1,1), // Adjust color if needed
+    color: rgb(1, 1, 1),
   });
 
-  // Save the modified PDF and return it
   const pdfBytes = await pdfDoc.save();
-  // fs.writeFileSync("./uploads/test.pdf", pdfBytes);
-  // Return the PDF bytes if needed for further processing
+  fs.writeFileSync("./uploads", pdfBytes);
   return pdfBytes;
 }
+
 module.exports = {
   generateExecutiveCertificate,
   sendEmailWithAttachment,
