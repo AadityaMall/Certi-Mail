@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import WebFont from 'webfontloader';
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import WebFont from "webfontloader";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import PdfPreview from "./pdfPreview";
 const CertificateGenerator = () => {
   const [fonts, setFonts] = useState([]);
-  const [selectedFont, setSelectedFont] = useState('');
+  const [selectedFont, setSelectedFont] = useState("");
   const [templateFile, setTemplateFile] = useState(null);
-  const [userName, setUserName] = useState('John Doe');
+  const [userName, setUserName] = useState("John Doe");
+  const [selectedPDF, setSelectedPDF] = useState(null);
+  const [pdfURL, setPdfURL] = useState(null);
 
   // Fetch Google Fonts list
   useEffect(() => {
@@ -17,7 +21,7 @@ const CertificateGenerator = () => {
         );
         setFonts(response.data.items);
       } catch (error) {
-        console.error('Error fetching fonts:', error);
+        console.error("Error fetching fonts:", error);
       }
     };
     fetchFonts();
@@ -33,29 +37,40 @@ const CertificateGenerator = () => {
   // Handle PDF template upload
   const handleTemplateUpload = (e) => {
     setTemplateFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setSelectedPDF(file);
+      setPdfURL(URL.createObjectURL(file)); // Create a preview URL for the PDF
+    } else {
+      alert("Please upload a valid PDF file.");
+    }
   };
 
   // Handle submission
   const handleGenerateCertificate = async () => {
     if (!templateFile || !selectedFont) {
-      alert('Please select a font and upload a template.');
+      alert("Please select a font and upload a template.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('name', userName);
-    formData.append('fontName', selectedFont);
-    formData.append('template', templateFile);
+    formData.append("name", userName);
+    formData.append("fontName", selectedFont);
+    formData.append("template", templateFile);
 
     try {
-      const response = await axios.post('http://localhost:4000/generate-certificate', formData);
+      const response = await axios.post(
+        "http://localhost:4000/generate-certificate",
+        formData
+      );
     } catch (error) {
-      console.error('Error generating certificate:', error);
+      console.error("Error generating certificate:", error);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
+    <>
+    <div style={{ maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
       <h3>Generate Certificate</h3>
 
       <input
@@ -63,13 +78,13 @@ const CertificateGenerator = () => {
         value={userName}
         onChange={(e) => setUserName(e.target.value)}
         placeholder="Enter Name"
-        style={{ marginBottom: '10px', width: '100%', padding: '8px' }}
+        style={{ marginBottom: "10px", width: "100%", padding: "8px" }}
       />
 
       <h4>Select Google Font</h4>
       <select
         onChange={(e) => setSelectedFont(e.target.value)}
-        style={{ padding: '8px', width: '100%' }}
+        style={{ padding: "8px", width: "100%" }}
       >
         <option value="" disabled selected>
           Choose a font
@@ -84,7 +99,10 @@ const CertificateGenerator = () => {
       <h4>Upload Certificate Template</h4>
       <input type="file" accept=".pdf" onChange={handleTemplateUpload} />
 
-      <button onClick={handleGenerateCertificate} style={{ marginTop: '20px', padding: '10px 20px' }}>
+      <button
+        onClick={handleGenerateCertificate}
+        style={{ marginTop: "20px", padding: "10px 20px" }}
+      >
         Generate Certificate
       </button>
 
@@ -92,15 +110,17 @@ const CertificateGenerator = () => {
       <div
         style={{
           fontFamily: selectedFont,
-          fontSize: '24px',
-          padding: '10px',
-          border: '1px solid #ccc',
-          marginTop: '10px',
+          fontSize: "24px",
+          padding: "10px",
+          border: "1px solid #ccc",
+          marginTop: "10px",
         }}
       >
         {userName}
       </div>
     </div>
+      {pdfURL && <PdfPreview fileUrl={pdfURL} />}
+    </>
   );
 };
 
