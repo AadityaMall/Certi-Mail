@@ -6,6 +6,7 @@ const fontkit = require("@pdf-lib/fontkit"); // Import fontkit
 
 const sendEmailWithAttachment = async (recipientEmail, pdfBuffer) => {
   try {
+    console.log("sending mail");
     // Configure your SMTP server details
     const transporter = nodemailer.createTransport({
       service: "gmail", // Use 'Gmail', 'Yahoo', 'Outlook', or your SMTP server
@@ -17,8 +18,8 @@ const sendEmailWithAttachment = async (recipientEmail, pdfBuffer) => {
     const mailOptions = {
       from: process.env.SMPT_MAIL, // Sender address
       to: recipientEmail, // Recipient address
-      subject: "IET MPSTME Certificate", // Email subject
-      text: "We are excited to share that your IET MPSTME Certificate is now ready. Attached to this email, you will find your certificate acknowledging your tenure with IET MPSTME on Campus.\n\nThank you for being a valued member of our community. We look forward to your continued involvement in our events and activities. \n\nBest regards, \nIET MPSTME on Campus", // Email body
+      subject: "IET's Botson 9.0 Certificate", // Email subject
+      text: "We are excited to share that your IET's Botson 9.0 Certificate is now ready. Attached to this email, you will find your certificate acknowledging your participation in Botson 9.0.\n\nThank you for your participation. We look forward to your continued involvement in our events and activities. \n\nBest regards, \nIET MPSTME on Campus", // Email body
       attachments: [
         {
           filename: "certificate.pdf", // Attachment name
@@ -162,9 +163,39 @@ async function generateSuperCoreCertificate(name, designation, designPath) {
   // Return the PDF bytes if needed for further processing
   return pdfBytes;
 }
+async function generateEventCertificates(name, designPath) {
+  console.log("PDF generation function called");
+
+  // Read the existing PDF template
+  const pdfDoc = await PDFDocument.load(designPath); // Load the PDF template
+  pdfDoc.registerFontkit(fontkit);
+
+  const participantFontBytes = fs.readFileSync("./Fonts/AnastasiaScript.ttf"); // Path to your custom font file
+  const participantFont = await pdfDoc.embedFont(participantFontBytes); // Embed the custom font
+
+  
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0]; // Use the first page for modifications (modify this if needed)
+
+  // Add text to the existing page
+  firstPage.drawText(`${name}`, {
+    x: 240, // Adjust the x position as per your template layout
+    y: 215, // Adjust the y position as per your template layout
+    size: 35,
+    font: participantFont,
+    color: rgb(1,1,1), // Adjust color if needed
+  });
+
+  // Save the modified PDF and return it
+  const pdfBytes = await pdfDoc.save();
+  // fs.writeFileSync("./uploads/test.pdf", pdfBytes);
+  // Return the PDF bytes if needed for further processing
+  return pdfBytes;
+}
 module.exports = {
   generateExecutiveCertificate,
   sendEmailWithAttachment,
   generateCoreCertificate,
   generateSuperCoreCertificate,
+  generateEventCertificates,
 };
