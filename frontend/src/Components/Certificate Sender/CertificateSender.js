@@ -161,7 +161,7 @@ const CertificateGenerator = () => {
               </Col>
             </Row>
             <button className="bg-teal-500 font-bold mx-[50px]" onClick={generateCertificate}>Check Certificate</button>
-            <button className="mx-[50px] my-[10px] bg-[#5cb85c]">Next</button>
+            <button className="mx-[50px]  my-[10px] bg-[#5cb85c]">Next</button>
           </div>
         </>
       )}
