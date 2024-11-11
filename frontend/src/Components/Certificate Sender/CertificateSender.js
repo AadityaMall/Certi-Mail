@@ -4,6 +4,7 @@ import fontkit from "@pdf-lib/fontkit";
 import PdfPreview from "./pdfPreview";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import { Container, Row, Col, Form, InputGroup } from "react-bootstrap";
+import FileUpload from "./FileUpload";
 
 const CertificateGenerator = () => {
   const [templateFile, setTemplateFile] = useState(null);
@@ -16,13 +17,8 @@ const CertificateGenerator = () => {
   const [fontFile, setFontFile] = useState(null);
 
   // Handle PDF template upload
-  const handleTemplateUpload = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
+  const handleTemplateUpload = (file) => {
       setTemplateFile(file);
-    } else {
-      alert("Please upload a valid PDF file.");
-    }
   };
 
   // Handle TTF font file upload
@@ -86,7 +82,7 @@ const CertificateGenerator = () => {
       {!pdfURL ? (
         <div className="text-center">
           <h4>Upload Certificate Template</h4>
-          <input type="file" accept=".pdf" onChange={handleTemplateUpload} />
+          <FileUpload onFileSelect={handleTemplateUpload}/>
         </div>
       ) : (
         <>
