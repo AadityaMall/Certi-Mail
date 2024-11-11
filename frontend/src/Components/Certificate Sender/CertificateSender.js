@@ -16,12 +16,10 @@ const CertificateGenerator = () => {
   const [color, setColor] = useState({ r: 0, g: 0, b: 0 });
   const [fontFile, setFontFile] = useState(null);
 
-  // Handle PDF template upload
   const handleTemplateUpload = (file) => {
-      setTemplateFile(file);
+    setTemplateFile(file);
   };
 
-  // Handle TTF font file upload
   const handleFontUpload = (e) => {
     const file = e.target.files[0];
     if (file && (file.type === "font/ttf" || file.name.endsWith(".ttf"))) {
@@ -31,7 +29,6 @@ const CertificateGenerator = () => {
     }
   };
 
-  // Handle color input and convert to 0-1 scale
   const handleColorChange = (e) => {
     const colorHex = e.target.value;
     const r = parseInt(colorHex.slice(1, 3), 16) / 255;
@@ -40,10 +37,8 @@ const CertificateGenerator = () => {
     setColor({ r, g, b });
   };
 
-  // Generate the certificate with selected properties
   const generateCertificate = async () => {
     if (!templateFile) return;
-
     const fontBytes = fontFile ? await fontFile.arrayBuffer() : null;
     const pdfBytes = await templateFile.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -69,7 +64,6 @@ const CertificateGenerator = () => {
     );
   };
 
-  // Generate certificate whenever dependencies change
   useEffect(() => {
     generateCertificate();
   }, [templateFile]);
@@ -77,89 +71,112 @@ const CertificateGenerator = () => {
   return (
     <Container
       fluid
-      className="vh-100 d-flex align-items-center justify-content-center"
+      className="md:mt-[0px] mt-[25px] h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 p-6"
     >
       {!pdfURL ? (
         <div className="text-center">
-          <h4>Upload Certificate Template</h4>
-          <FileUpload onFileSelect={handleTemplateUpload}/>
+          <FileUpload onFileSelect={handleTemplateUpload} />
         </div>
       ) : (
-        <>
-          <div className="flex w-100 flex-col">
-            <Row className="w-100">
-              <Col
-                md={6}
-                className="d-flex align-items-center justify-content-center"
-              >
-                <PdfPreview fileUrl={pdfURL} />
-              </Col>
-              <Col md={6} className="p-4">
-                <h4>Customize Your Certificate</h4>
-                <Form>
-                  <Form.Group controlId="userName">
-                    <Form.Label>Enter Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      placeholder="Enter Name"
-                    />
-                  </Form.Group>
+        <div className="w-full max-w-6xl bg-white rounded-lg shadow-lg p-8 mt-5">
+          <h3 className="text-2xl text-center font-bold text-teal-600 mb-4 my-[10px]">
+            Customize Your Certificate
+          </h3>
+          <Row>
+            <Col md={6} className="flex flex-col justify-center items-center">
+              <PdfPreview fileUrl={pdfURL} />
+            </Col>
+            <Col md={6}>
+              <Form className="md:mt-[0px] mt-[25px]">
+                <Form.Group controlId="userName" className="mb-3">
+                  <Form.Label className="text-teal-700 font-medium">
+                    Enter Name
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Enter Name"
+                    className="rounded border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                  />
+                </Form.Group>
 
-                  <Form.Group controlId="fontUpload">
-                    <Form.Label>Upload Custom TTF Font (optional)</Form.Label>
-                    <Form.Control
-                      type="file"
-                      accept=".ttf"
-                      onChange={handleFontUpload}
-                    />
-                  </Form.Group>
+                <Form.Group controlId="fontUpload" className="mb-3">
+                  <Form.Label className="text-teal-700 font-medium">
+                    Upload Custom TTF Font (optional)
+                  </Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept=".ttf"
+                    onChange={handleFontUpload}
+                    className="rounded border-gray-300"
+                  />
+                </Form.Group>
 
-                  <Form.Group controlId="fontSize">
-                    <Form.Label>Font Size</Form.Label>
+                <Form.Group controlId="fontSize" className="mb-3">
+                  <Form.Label className="text-teal-700 font-medium">
+                    Font Size
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(parseInt(e.target.value) || 0)}
+                    className="rounded border-gray-300 focus:border-teal-500 focus:ring-teal-500"
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="coordinates" className="mb-3">
+                  <Form.Label className="text-teal-700 font-medium">
+                    Coordinates
+                  </Form.Label>
+                  <InputGroup>
                     <Form.Control
                       type="number"
-                      value={fontSize}
-                      onChange={(e) =>
-                        setFontSize(parseInt(e.target.value) || 0)
-                      }
+                      placeholder="X"
+                      value={xCoord}
+                      onChange={(e) => setXCoord(parseInt(e.target.value) || 0)}
+                      className="rounded border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                     />
-                  </Form.Group>
+                    <Form.Control
+                      type="number"
+                      placeholder="Y"
+                      value={yCoord}
+                      onChange={(e) => setYCoord(parseInt(e.target.value) || 0)}
+                      className="rounded border-gray-300 focus:border-teal-500 focus:ring-teal-500 ml-2"
+                    />
+                  </InputGroup>
+                </Form.Group>
 
-                  <Form.Group controlId="coordinates">
-                    <Form.Label>Coordinates</Form.Label>
-                    <InputGroup>
-                      <Form.Control
-                        type="number"
-                        placeholder="X"
-                        value={xCoord}
-                        onChange={(e) =>
-                          setXCoord(parseInt(e.target.value) || 0)
-                        }
-                      />
-                      <Form.Control
-                        type="number"
-                        placeholder="Y"
-                        value={yCoord}
-                        onChange={(e) =>
-                          setYCoord(parseInt(e.target.value) || 0)
-                        }
-                      />
-                    </InputGroup>
-                  </Form.Group>
+                <Form.Group controlId="color" className="mb-3">
+                  <Form.Label className="text-teal-700 font-medium">
+                    Text Color
+                  </Form.Label>
+                  <Form.Control
+                    type="color"
+                    onChange={handleColorChange}
+                    className="rounded border-gray-300"
+                  />
+                </Form.Group>
 
-                  <Form.Group controlId="color">
-                    <Form.Label>Text Color</Form.Label>
-                    <Form.Control type="color" onChange={handleColorChange} />
-                  </Form.Group>
-                </Form>
-              </Col>
-            </Row>
-            <button className="bg-teal-500 font-bold mx-[50px]" onClick={generateCertificate}>Check Certificate</button>
-            <button className="mx-[50px]  my-[10px] bg-[#5cb85c]">Next</button>
-          </div>
-        </>
+                <div className="flex justify-start space-x-4 mt-6">
+                  <button
+                    type="button"
+                    onClick={generateCertificate}
+                    className="bg-teal-500 text-white font-semibold py-2 px-6 rounded shadow hover:bg-teal-600"
+                  >
+                    Check Certificate
+                  </button>
+                  <button
+                    type="button"
+                    className="bg-green-500 text-white font-semibold py-2 px-6 rounded shadow hover:bg-green-600"
+                  >
+                    Next
+                  </button>
+                </div>
+              </Form>
+            </Col>
+          </Row>
+        </div>
       )}
     </Container>
   );

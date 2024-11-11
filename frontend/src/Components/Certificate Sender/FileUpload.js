@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 const validatePDFHeader = async (file) => {
   const arrayBuffer = await file.arrayBuffer();
   const header = new Uint8Array(arrayBuffer.slice(0, 4));
@@ -20,7 +21,7 @@ const checkSinglePagePDF = async (file) => {
   try {
     const arrayBuffer = await file.arrayBuffer();
     const pdfDocument = await pdfjsLib.getDocument(arrayBuffer).promise;
-    return pdfDocument.numPages === 1; // True if single-page, false otherwise
+    return pdfDocument.numPages === 1; 
   } catch (error) {
     toast.error("Error parsing PDF. Please upload a valid PDF file.");
     return false;
@@ -60,7 +61,7 @@ const FileUpload = ({ onFileSelect }) => {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center">
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="col-span-1 text-center md:text-left">
