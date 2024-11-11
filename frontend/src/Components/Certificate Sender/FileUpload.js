@@ -1,28 +1,58 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-
-const validatePDF = async (file) => {
+import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+const validatePDFHeader = async (file) => {
   const arrayBuffer = await file.arrayBuffer();
   const header = new Uint8Array(arrayBuffer.slice(0, 4));
-  const isValidPDF = header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46; // %PDF in ASCII
-  return isValidPDF;
+  return (
+    header[0] === 0x25 &&
+    header[1] === 0x50 &&
+    header[2] === 0x44 &&
+    header[3] === 0x46
+  );
+};
+
+// Function to check if PDF is single-page
+const checkSinglePagePDF = async (file) => {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDocument = await pdfjsLib.getDocument(arrayBuffer).promise;
+    return pdfDocument.numPages === 1; // True if single-page, false otherwise
+  } catch (error) {
+    toast.error("Error parsing PDF. Please upload a valid PDF file.");
+    return false;
+  }
 };
 
 const FileUpload = ({ onFileSelect }) => {
-  const onDrop = useCallback(async (acceptedFiles, rejectedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const isValidPDF = await validatePDF(acceptedFiles[0]);
-      if (isValidPDF) {
-        onFileSelect(acceptedFiles[0]);
-      } else {
-        toast.error("Invalid file: Please upload a valid PDF document.");
+  const onDrop = useCallback(
+    async (acceptedFiles, rejectedFiles) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+
+        // Step 1: Validate PDF Header
+        const isPDF = await validatePDFHeader(file);
+        if (!isPDF) {
+          toast.error("Invalid file: Please upload a valid PDF document.");
+          return;
+        }
+
+        const isSinglePage = await checkSinglePagePDF(file);
+        if (!isSinglePage) {
+          toast.error("Please upload a single-page PDF file.");
+          return;
+        }
+
+        onFileSelect(file);
+      } else if (rejectedFiles.length > 0) {
+        toast.error("Please upload a PDF file.");
       }
-    } else if (rejectedFiles.length > 0) {
-      toast.error("Please upload a PDF file.");
-    }
-  }, [onFileSelect]);
+    },
+    [onFileSelect]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -45,13 +75,15 @@ const FileUpload = ({ onFileSelect }) => {
           <div
             {...getRootProps()}
             className={`col-span-1 border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center
-            ${isDragActive ? 'bg-teal-50' : 'bg-gray-100'} cursor-pointer`}
+            ${isDragActive ? "bg-teal-50" : "bg-gray-100"} cursor-pointer`}
           >
             <input {...getInputProps()} />
             {isDragActive ? (
               <p className="text-teal-500">Drop the PDF file here...</p>
             ) : (
-              <p className="text-gray-700">Drag & drop a PDF file here, or click to select one</p>
+              <p className="text-gray-700">
+                Drag & drop a PDF file here, or click to select one
+              </p>
             )}
             <button className="mt-4 px-6 py-2 bg-teal-500 text-white rounded shadow hover:bg-teal-600">
               Choose File
@@ -59,8 +91,7 @@ const FileUpload = ({ onFileSelect }) => {
           </div>
         </div>
       </div>
-
-                </div>
+    </div>
   );
 };
 
