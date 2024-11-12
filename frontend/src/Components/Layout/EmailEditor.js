@@ -15,8 +15,6 @@ const EmailEditor = ({ body, onBodyChange }) => {
             ["bold", "italic", "underline"],
             ["link"],
             ["blockquote"],
-            ["image"],
-            ["code-block"],
           ],
         }}
         theme="snow"

@@ -27,6 +27,53 @@ const CertificateGenerator = () => {
   const [userAppPassword, setUserAppPassword] = useState("");
   const [userAppPasswordVerified, setUserAppPasswordVerified] = useState(false);
 
+  const sendCertificateHandler = async () => {
+    if (!csvFile || !templateFile) {
+      toast.error("Please upload both the template and the CSV file.");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Append the files
+    formData.append("excelFile", csvFile);
+    formData.append("templateFile", templateFile);
+
+    if (fontFile) {
+      formData.append("fontFile", fontFile);
+    }
+
+    // Append the customization options
+    formData.append("xCoord", xCoord);
+    formData.append("yCoord", yCoord);
+    formData.append("fontSize", fontSize);
+    formData.append("color", JSON.stringify(color));
+    formData.append("subject", subject);
+    formData.append("body", body);
+
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/v1/send-mail-with-certificate",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+      console.log(response.data)
+      console.log(response.ok)
+      if (response.ok) {
+        toast.success("Certificates sent successfully!");
+      } else {
+        toast.error(result.message || "Failed to send certificates.");
+      }
+    } catch (error) {
+      console.error("Error sending certificates:", error);
+      toast.error("An error occurred while sending certificates.");
+    }
+  };
+
   const handleUserEmailVerification = (e) => {
     e.preventDefault();
   };
@@ -99,7 +146,18 @@ const CertificateGenerator = () => {
   useEffect(() => {
     generateCertificate();
   }, [templateFile]);
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = ""; // Required for Chrome to display the alert
+    };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
   return (
     <Container
       fluid
@@ -274,7 +332,11 @@ const CertificateGenerator = () => {
             </Row>
             <Container className="bg-[#ffadad] p-2 my-[20px] flex flex-col justify-center items-center">
               <div className="flex justify-center items-center flex-wrap">
-                <InfoOutlined htmlColor="red" fontSize="large" className="my-[10px]" />
+                <InfoOutlined
+                  htmlColor="red"
+                  fontSize="large"
+                  className="my-[10px]"
+                />
                 <div className="w-100 text-wrap">
                   <p className="text-wrap">
                     Emails will be sent from{" "}
@@ -334,7 +396,10 @@ const CertificateGenerator = () => {
                 </Row>
               </Container>
             </Container>
-            <button className="mt-4 min-w-80 max-w-80 px-6 py-2 bg-teal-500 text-white rounded shadow hover:bg-teal-600">
+            <button
+              onClick={sendCertificateHandler}
+              className="mt-4 min-w-80 max-w-80 px-6 py-2 bg-teal-500 text-white rounded shadow hover:bg-teal-600"
+            >
               Send Certificates <MailOutline />
             </button>
           </Container>
