@@ -45,7 +45,7 @@ const NavBar = () => {
                     : "nav-link text-gray-700 hover:text-teal-500 px-4 py-2"
                 }
               >
-                About
+                Home
               </NavLink>
             </Nav.Item>
             <Nav.Item>
@@ -60,18 +60,7 @@ const NavBar = () => {
                 Contact
               </NavLink>
             </Nav.Item>
-            <Nav.Item>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  isActive
-                    ? "nav-link text-teal-500 font-bold px-4 py-2"
-                    : "nav-link text-gray-700 hover:text-teal-500 px-4 py-2"
-                }
-              >
-                Login/Register
-              </NavLink>
-            </Nav.Item>
+
             <Nav.Item className="ms-md-3 mt-2 mt-md-0">
               <Button
                 href="/certificate-sender"

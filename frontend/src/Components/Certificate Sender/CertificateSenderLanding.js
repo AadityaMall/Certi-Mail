@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const CertificateSenderLanding = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="max-w-2xl text-center">
         {/* Main Heading */}
         <h1 className="text-4xl md:text-5xl font-bold text-teal-500 mb-4">

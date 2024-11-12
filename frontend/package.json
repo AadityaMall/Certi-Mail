@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.6",
+    "@mui/material": "^6.1.6",
     "@pdf-lib/fontkit": "^1.1.1",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
@@ -12,17 +16,20 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.5",
+    "papaparse": "^5.4.1",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.11.174",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.5",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",
     "web-vitals": "^2.1.4",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
