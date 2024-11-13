@@ -77,7 +77,10 @@ const FileUploadCSV = ({ onFileSelect }) => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: [".csv", ".xlsx"], // Accept both CSV and Excel files
+    accept: [
+      "text/csv", // CSV files
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX files
+    ],
   });
 
   return (

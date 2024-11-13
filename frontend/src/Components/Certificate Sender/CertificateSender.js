@@ -38,23 +38,20 @@ const CertificateGenerator = () => {
   );
 
   const columns = [
-    { field: "id", headerName: "SR.NO", width: 50, flex: 0.5 },
+    { field: "id", headerName: "SR.NO", width: 50 },
     {
       field: "name",
       headerName: "Name",
       width: 150,
-      flex: 1,
     },
     {
       field: "email",
       headerName: "Email",
       width: 250,
-      flex: 1,
     },
     {
       field: "status",
       headerName: "Status",
-      flex: 1,
       cellClassName: (params) => {
         return params.row["status"] === "Success"
           ? "text-success"
@@ -451,25 +448,22 @@ const CertificateGenerator = () => {
             </>
           ) : (
             <>
-              <div className="flex justify-center items-center w-full min-h-screen">
+              <div className="flex justify-center items-center w-full min-h-screen overflow-x-scroll">
                 <div className="flex flex-col justify-center items-center">
                   <h3 className="text-teal-500">Results.</h3>
-                  <Box sx={{ height: 400, width: "100%" }}>
-                    <DataGrid
-                      rows={rows}
-                      columns={columns}
-                      initialState={{
-                        pagination: {
-                          paginationModel: {
-                            pageSize: 5,
-                          },
+                  <DataGrid
+                    rows={rows}
+                    columns={columns}
+                    initialState={{
+                      pagination: {
+                        paginationModel: {
+                          pageSize: 5,
                         },
-                      }}
-                      pageSizeOptions={[5]}
-                      checkboxSelection
-                      disableRowSelectionOnClick
-                    />
-                  </Box>
+                      },
+                    }}
+                    pageSizeOptions={[5]}
+                    disableRowSelectionOnClick
+                  />
                 </div>
               </div>
             </>

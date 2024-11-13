@@ -72,7 +72,7 @@ async function generateEventCertificates(name, templateFile, xCoord, yCoord, fon
     const modifiedPdfBytes = await pdfDoc.save();
 
     // Optionally save the file locally
-    fs.writeFileSync("./test.pdf", modifiedPdfBytes);
+    // fs.writeFileSync("./test.pdf", modifiedPdfBytes);
 
     // Return the modified PDF bytes
     return modifiedPdfBytes;
