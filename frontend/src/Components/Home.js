@@ -1,8 +1,9 @@
 import React from 'react'
+import Loader from './Layout/Loader'
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <Loader/>
   )
 }
 

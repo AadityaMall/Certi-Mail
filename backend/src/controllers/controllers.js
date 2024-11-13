@@ -67,7 +67,7 @@ exports.SendMailWithCertificate = async (req, res) => {
     console.log(data)
     res
       .status(200)
-      .json({ message: "Files processed and certificate generated"});
+      .json({ message: "Files processed and certificate generated",generatedData:data});
   } catch (error) {
     console.error("Error processing files:", error);
     res.status(500).json({ message: "Error processing files" });
