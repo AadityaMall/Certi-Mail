@@ -5,6 +5,7 @@ import CertificateUploader from "./Components/Certificate Sender/CertificateSend
 import NavBar from "./Components/Layout/Navbar";
 import Footer from "./Components/Layout/Footer";
 import Home from "./Components/Home";
+import Contact from "./Components/Contact";
 import { Routes, Route } from "react-router-dom";
 import CertificateSenderLanding from "./Components/Certificate Sender/CertificateSenderLanding";
 const App = () => {
@@ -13,7 +14,7 @@ const App = () => {
       <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/contact" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
         <Route
           path="/certificate-sender"
           element={<CertificateSenderLanding />}
