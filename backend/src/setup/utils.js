@@ -9,20 +9,21 @@ const sendEmailWithAttachment = async (
   pdfBuffer,
   subject,
   body,
-
+  userEmail,
+  appPassword,
 ) => {
   try {
     // Configure your SMTP server details
     const transporter = nodemailer.createTransport({
       service: "gmail", // Use 'Gmail', 'Yahoo', 'Outlook', or your SMTP server
       auth: {
-        user: process.env.SMPT_MAIL, // Replace with your email
-        pass:process.env.SMPT_PASSWORD, // Replace with your email password or app-specific password
+        user: userEmail?userEmail:process.env.SMPT_MAIL, // Replace with your email
+        pass: appPassword?appPassword:process.env.SMPT_PASSWORD, // Replace with your email password or app-specific password
       },
     });
 
     const mailOptions = {
-      from: process.env.SMPT_MAIL, // Sender address
+      from: userEmail? userEmail : process.env.SMPT_MAIL, // Sender address
       to: recipientEmail, // Recipient address
       subject: subject,
       html: body,
@@ -59,7 +60,6 @@ async function generateEventCertificates(name, templateFile, xCoord, yCoord, fon
 
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
-    console.log(name)
     // Draw the name on the PDF at the specified coordinates
     firstPage.drawText(name, {
       x: xCoord,

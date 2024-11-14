@@ -6,6 +6,7 @@ import {
   AUTHENITCATE_EMAIL_PASS_SUCCESS,
   AUTHENITCATE_EMAIL_PASS_REQUEST,
   CLEAR_ERRORS,
+  RESET_REDUCERS,
 } from "./constants";
 
 export const sendCertificateReducer = (
@@ -36,35 +37,52 @@ export const sendCertificateReducer = (
         ...state,
         error: null,
       };
+    case RESET_REDUCERS:
+      return {
+        ...state,
+        error: null,
+        loading: false,
+        success: false,
+      };
     default:
       return state;
   }
 };
 
-export const appPasswordAuthenticationReducer = (state = {}, action) => {
+export const appPasswordAuthenticationReducer = (
+  state = { success: false },
+  action
+) => {
   switch (action.type) {
-    case SEND_CERTIFICATE_MAIL_REQUEST:
+    case AUTHENITCATE_EMAIL_PASS_REQUEST:
       return {
         loading: true,
       };
-    case SEND_CERTIFICATE_MAIL_SUCCESS:
+    case AUTHENITCATE_EMAIL_PASS_SUCCESS:
       return {
         ...state,
         loading: false,
-        responseTable: action.payload,
+        success: action.payload,
       };
 
-    case SEND_CERTIFICATE_MAIL_FAIL:
+    case AUTHENITCATE_EMAIL_PASS_FAIL:
       return {
         ...state,
         loading: false,
-        responseTable: null,
+        success: false,
         error: action.payload,
       };
     case CLEAR_ERRORS:
       return {
         ...state,
         error: null,
+      };
+    case RESET_REDUCERS:
+      return {
+        ...state,
+        error: null,
+        loading: false,
+        success: false,
       };
     default:
       return state;

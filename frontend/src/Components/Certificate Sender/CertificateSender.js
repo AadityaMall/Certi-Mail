@@ -8,11 +8,15 @@ import { Container, Row, Col, Form, InputGroup } from "react-bootstrap";
 import FileUpload from "./FileUpload";
 import FileUploadCSV from "./FileUploadCSV";
 import { InfoOutlined, MailOutline, TaskAlt } from "@mui/icons-material";
-import { Box } from "@mui/material";
 import EmailEditor from "../Layout/EmailEditor";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { clearErrors, sendCertificates } from "../../Redux/action";
+import {
+  authenticateEmail,
+  clearErrors,
+  resetReducers,
+  sendCertificates,
+} from "../../Redux/action";
 import Loader from "../Layout/Loader";
 import { DataGrid } from "@mui/x-data-grid";
 const CertificateGenerator = () => {
@@ -30,12 +34,18 @@ const CertificateGenerator = () => {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [finaluserEmail, setfinalUserEmail] = useState(null);
   const [userAppPassword, setUserAppPassword] = useState("");
-  const [userAppPasswordVerified, setUserAppPasswordVerified] = useState(false);
+  const [finaluserAppPassword, setfinalUserAppPassword] = useState(null);
 
   const { error, responseTable, loading } = useSelector(
     (state) => state.sendCertificates
   );
+  const {
+    error: validationError,
+    success,
+    loading: validationLoading,
+  } = useSelector((state) => state.authenticateUser);
 
   const columns = [
     { field: "id", headerName: "SR.NO", width: 50 },
@@ -69,39 +79,49 @@ const CertificateGenerator = () => {
         status: element.Response,
       });
     });
+
   const sendCertificateHandler = async () => {
     if (!csvFile || !templateFile) {
       toast.error("Please upload both the template and the CSV file.");
       return;
     }
-
     const formData = new FormData();
-
     formData.append("excelFile", csvFile);
     formData.append("templateFile", templateFile);
-
     if (fontFile) {
       formData.append("fontFile", fontFile);
     }
-
     formData.append("xCoord", xCoord);
     formData.append("yCoord", yCoord);
     formData.append("fontSize", fontSize);
     formData.append("color", JSON.stringify(color));
     formData.append("subject", subject);
     formData.append("body", body);
-
+    if (finaluserEmail && finaluserAppPassword) {
+      formData.append("userEmail", finaluserEmail);
+      formData.append("appPassword", finaluserAppPassword);
+    }
     dispatch(sendCertificates(formData));
   };
 
   const handleUserEmailVerification = (e) => {
     e.preventDefault();
+    if (!userEmail || !userAppPassword) {
+      toast.error("Please enter valid details");
+      return;
+    }
+    if (userAppPassword.replace(/\s/g, "").length !== 16) {
+      toast.error("Please enter a 16 character app password");
+      return;
+    }
+    const formData = {
+      email: userEmail,
+      appPassword: userAppPassword,
+    };
+
+    dispatch(authenticateEmail(formData));
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Email Subject:", subject);
-    console.log("Email Body:", body);
-  };
+
   const handleSubjectChange = (e) => {
     setSubject(e.target.value);
   };
@@ -164,8 +184,12 @@ const CertificateGenerator = () => {
   };
 
   useEffect(() => {
+    if(!templateFile){
+      dispatch(resetReducers())
+    }
     generateCertificate();
-  }, [templateFile]);
+    
+  }, [templateFile,dispatch]);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -185,7 +209,19 @@ const CertificateGenerator = () => {
       toast.error(error);
       dispatch(clearErrors());
     }
-  }, [error, dispatch]);
+    if (validationError) {
+      toast.error(error);
+      dispatch(clearErrors());
+    }
+  }, [error, dispatch, validationError]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success("User Validated");
+      setfinalUserAppPassword(userAppPassword);
+      setfinalUserEmail(userEmail);
+    }
+  }, [success,userAppPassword,userEmail]);
 
   return (
     <>
@@ -348,7 +384,7 @@ const CertificateGenerator = () => {
                       <h3 className="text-2xl md:text-4xl text-teal-500 mb-4">
                         Customize your mail
                       </h3>
-                      <Form onSubmit={handleSubmit}>
+                      <Form>
                         <Form.Group controlId="emailSubject">
                           <Form.Label className="font-bold">Subject</Form.Label>
                           <Form.Control
@@ -372,71 +408,114 @@ const CertificateGenerator = () => {
                     </div>
                   </Col>
                 </Row>
-                <Container className="bg-[#ffadad] p-2 my-[20px] flex flex-col justify-center items-center">
-                  <div className="flex justify-center items-center flex-wrap">
-                    <InfoOutlined
-                      htmlColor="red"
-                      fontSize="large"
-                      className="my-[10px]"
-                    />
-                    <div className="w-100 text-wrap">
-                      <p className="text-wrap">
-                        Emails will be sent from{" "}
-                        <strong>email:collegeprojects09@gmail.com</strong>
-                      </p>
-                      <p>
-                        If you wish to send emails from your account, please
-                        provide with your Gmail Id and{" "}
-                        <Link
-                          className="text-black"
-                          to={`https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237`}
-                        >
-                          App Password
-                        </Link>
-                      </p>
-                    </div>
-                  </div>
-                  <Container>
-                    <Row>
-                      <Col md={4}>
-                        {" "}
-                        <Form.Group controlId="userEmail" className="mx-2">
-                          <Form.Label className="font-bold">Email</Form.Label>
-                          <Form.Control
-                            type="email"
-                            placeholder="Enter email"
-                            value={userEmail}
-                            onChange={(e) => setUserEmail(e.target.value)}
-                            required
-                            className="bg-transparent border-red-950 border-2"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={4}>
-                        {" "}
-                        <Form.Group controlId="userPassword" className="mx-2">
-                          <Form.Label className="font-bold">
-                            App Password
-                          </Form.Label>
-                          <Form.Control
-                            type="password"
-                            placeholder="Enter App Password"
-                            value={userAppPassword}
-                            onChange={(e) => setUserAppPassword(e.target.value)}
-                            required
-                            className="bg-transparent border-red-950 border-2"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={4}>
-                        <div className="flex flex-col justify-end h-full">
-                          <button className="w-full py-[8px] md:my-[0px] my-[8px] h-auto bg-red-500 text-white rounded shadow hover:bg-red-600">
-                            Verify
-                          </button>
+                {console.log(success)}
+                <Container
+                  className={`${
+                    success ? "bg-[#B2FBA5]" : "bg-[#ffadad]"
+                  } p-2 my-[20px] flex flex-col justify-center items-center`}
+                >
+                  {!success ? (
+                    <>
+                      <div className="flex justify-center items-center flex-wrap">
+                        <InfoOutlined
+                          htmlColor="red"
+                          fontSize="large"
+                          className="my-[10px]"
+                        />
+                        <div className="w-100 text-wrap">
+                          <p className="text-wrap">
+                            Emails will be sent from{" "}
+                            <strong>email:collegeprojects09@gmail.com</strong>
+                          </p>
+                          <p>
+                            If you wish to send emails from your account, please
+                            provide with your Gmail Id and{" "}
+                            <Link
+                              className="text-black"
+                              to={`https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237`}
+                            >
+                              App Password
+                            </Link>
+                          </p>
                         </div>
-                      </Col>
-                    </Row>
-                  </Container>
+                      </div>
+                      <Container>
+                        <Form onSubmit={handleUserEmailVerification}>
+                          <Row>
+                            <Col md={4}>
+                              {" "}
+                              <Form.Group
+                                controlId="userEmail"
+                                className="mx-2"
+                              >
+                                <Form.Label className="font-bold">
+                                  Email
+                                </Form.Label>
+                                <Form.Control
+                                  type="email"
+                                  placeholder="Enter email"
+                                  value={userEmail}
+                                  onChange={(e) => setUserEmail(e.target.value)}
+                                  required
+                                  className="bg-transparent border-red-950 border-2"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                              {" "}
+                              <Form.Group
+                                controlId="userPassword"
+                                className="mx-2"
+                              >
+                                <Form.Label className="font-bold">
+                                  App Password
+                                </Form.Label>
+                                <Form.Control
+                                  type="password"
+                                  minLength={16}
+                                  placeholder=" Enter App Password"
+                                  value={userAppPassword}
+                                  onChange={(e) =>
+                                    setUserAppPassword(e.target.value)
+                                  }
+                                  required
+                                  className="bg-transparent border-red-950 border-2"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                              <div className="flex flex-col justify-end h-full">
+                                <button
+                                  disabled={validationLoading}
+                                  className="w-full py-[8px] md:my-[0px] my-[8px] h-auto bg-red-500 text-white rounded shadow hover:bg-red-600"
+                                >
+                                  {validationLoading
+                                    ? "Verifyingg...."
+                                    : "Verify"}
+                                </button>
+                              </div>
+                            </Col>
+                          </Row>
+                        </Form>
+                      </Container>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-center items-center flex-wrap">
+                        <TaskAlt
+                          htmlColor="green"
+                          fontSize="large"
+                          className="my-[10px]"
+                        />
+                        <div className="w-100 text-wrap">
+                          <p className="text-wrap">
+                            Emails will be sent from{" "}
+                            <strong>email:{userEmail}</strong>
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </Container>
                 <button
                   onClick={sendCertificateHandler}

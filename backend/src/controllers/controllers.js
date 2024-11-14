@@ -8,7 +8,6 @@ const xlsx = require("xlsx");
 exports.AuthenticateEmailIdAppPassword = async (req, res) => {
   try {
     const { email, appPassword } = req.body;
-    console.log(appPassword.replace(/\s/g, "").length);
     if (appPassword.replace(/\s/g, "").length !== 16) {
       return res.status(401).send({ message: "Invalid App Password" });
     }
@@ -37,8 +36,7 @@ exports.SendMailWithCertificate = async (req, res) => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
 
-    let { xCoord, yCoord, fontSize, color, subject, body } = req.body;
-
+    let { xCoord, yCoord, fontSize, color, subject, body, userEmail, appPassword } = req.body;
     const parsedColor = color ? JSON.parse(color) : { r: 0, g: 0, b: 0 };
     
     xCoord = parseInt(xCoord, 10);
@@ -57,14 +55,13 @@ exports.SendMailWithCertificate = async (req, res) => {
         parsedColor,
         fontFile
       );
-      const response = await sendEmailWithAttachment(email, pdfBuffer, subject, body);
+      const response = await sendEmailWithAttachment(email, pdfBuffer, subject, body,userEmail,appPassword);
       if (response.rejected.includes(email)) {
         row["Response"] = "Failed"
       } else {
         row["Response"] = "Success"
       }
     }
-    console.log(data)
     res
       .status(200)
       .json({ message: "Files processed and certificate generated",generatedData:data});

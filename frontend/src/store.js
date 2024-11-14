@@ -1,10 +1,11 @@
 import { combineReducers } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { thunk } from "redux-thunk";
-import { sendCertificateReducer } from "./Redux/reducers";
+import { appPasswordAuthenticationReducer, sendCertificateReducer } from "./Redux/reducers";
 
 const reducers = combineReducers({
-    sendCertificates:sendCertificateReducer
+    sendCertificates:sendCertificateReducer,
+    authenticateUser:appPasswordAuthenticationReducer
 });
 const middleware = (getDefaultMiddleware) =>
   getDefaultMiddleware().concat(thunk);
