@@ -2,6 +2,7 @@ const {
   validateEmailCredentials,
   generateEventCertificates,
   sendEmailWithAttachment,
+  sendEmailUtil
 } = require("../setup/utils");
 const xlsx = require("xlsx");
 
@@ -56,6 +57,38 @@ exports.SendMailWithCertificate = async (req, res) => {
         fontFile
       );
       const response = await sendEmailWithAttachment(email, pdfBuffer, subject, body,userEmail,appPassword);
+      if (response.rejected.includes(email)) {
+        row["Response"] = "Failed"
+      } else {
+        row["Response"] = "Success"
+      }
+    }
+    res
+      .status(200)
+      .json({ message: "Files processed and certificate generated",generatedData:data});
+  } catch (error) {
+    console.error("Error processing files:", error);
+    res.status(500).json({ message: "Error processing files" });
+  }
+};
+exports.SendMails = async (req, res) => {
+  try {
+    // Access files from req.files
+    const excelFile = req.files["excelFile"][0].buffer;
+
+
+    const workbook = xlsx.read(excelFile, { type: "buffer" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    let { subject, body, userEmail, appPassword } = req.body;
+    
+
+    for (const row of data) {
+      const name = row["Name"];
+      const email = row["Email"];
+
+      const response = await this.sendEmailUtil(email, subject, body,userEmail,appPassword);
       if (response.rejected.includes(email)) {
         row["Response"] = "Failed"
       } else {

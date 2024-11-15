@@ -9,7 +9,7 @@ import {
   RESET_REDUCERS,
 } from "./constants";
 
-export const sendCertificateReducer = (
+export const sendMailsReducer = (
   state = { responseTable: null },
   action
 ) => {

@@ -30,6 +30,22 @@ export const sendCertificates = (certificateData) => async(dispatch) => {
   }
 };
 
+export const sendEmails = (mailData) => async(dispatch) => {
+  try {
+    dispatch({ type: SEND_CERTIFICATE_MAIL_REQUEST });
+    const { data } = await api.post("/send-mails", mailData);
+    dispatch({
+      type: SEND_CERTIFICATE_MAIL_SUCCESS,
+      payload: data.generatedData,
+    });
+  } catch (error) {
+    dispatch({
+      type: SEND_CERTIFICATE_MAIL_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
+
 export const authenticateEmail = (emailData) => async(dispatch) => {
   try {
     dispatch({ type: AUTHENITCATE_EMAIL_PASS_REQUEST });

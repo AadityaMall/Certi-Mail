@@ -1,8 +1,37 @@
 const { PDFDocument, rgb } = require("pdf-lib");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
-const path = require("path");
 const fontkit = require("@pdf-lib/fontkit"); // Import fontkit
+
+const sendEmailUtil = async (
+  recipientEmail,
+  subject,
+  body,
+  userEmail,
+  appPassword,
+) => {
+  try {
+    // Configure your SMTP server details
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // Use 'Gmail', 'Yahoo', 'Outlook', or your SMTP server
+      auth: {
+        user: userEmail?userEmail:process.env.SMPT_MAIL, // Replace with your email
+        pass: appPassword?appPassword:process.env.SMPT_PASSWORD, // Replace with your email password or app-specific password
+      },
+    });
+
+    const mailOptions = {
+      from: userEmail? userEmail : process.env.SMPT_MAIL, // Sender address
+      to: recipientEmail, // Recipient address
+      subject: subject,
+      html: body,
+    };
+    const info = await transporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
 
 const sendEmailWithAttachment = async (
   recipientEmail,
@@ -103,4 +132,5 @@ module.exports = {
   sendEmailWithAttachment,
   generateEventCertificates,
   validateEmailCredentials,
+  sendEmailUtil,
 };
