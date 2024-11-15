@@ -88,7 +88,7 @@ exports.SendMails = async (req, res) => {
       const name = row["Name"];
       const email = row["Email"];
 
-      const response = await this.sendEmailUtil(email, subject, body,userEmail,appPassword);
+      const response = await sendEmailUtil(email, subject, body,userEmail,appPassword);
       if (response.rejected.includes(email)) {
         row["Response"] = "Failed"
       } else {
