@@ -7,32 +7,39 @@ dotenv.config({ path: "./src/setup/config.env" });
 const app = express();
 const port = process.env.PORT || 4000;
 
-// --- CORS Configuration ---
-// It's best practice to be specific about your CORS policy
+const frontendUrl = process.env.FRONTEND_URL;
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:4000'
+];
+
+if (frontendUrl) {
+    allowedOrigins.push(frontendUrl);
+}
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-  optionsSuccessStatus: 204
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`Not allowed by CORS for origin: ${origin}`));
+        }
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    optionsSuccessStatus: 204
 };
 
-// --- Middleware Setup ---
-// 1. Enable CORS with specific options 
-// 1. Handle preflight requests across all routes
 app.options('*', cors(corsOptions));
-
-// 2. Enable CORS for all other requests
 app.use(cors(corsOptions));
 
-// 3. Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 4. Your API routes
 app.use("/api/v1", appRoutes);
 
-// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
+    console.log(`Allowed CORS origins: ${allowedOrigins.join(', ')}`);
 });

@@ -19,9 +19,10 @@ export const sendCertificates = (certificateData) => async(dispatch) => {
   try {
     dispatch({ type: SEND_CERTIFICATE_MAIL_REQUEST });
     const { data } = await api.post("/send-mail-with-certificate", certificateData);
+    console.log("Response from backend:", data);
     dispatch({
       type: SEND_CERTIFICATE_MAIL_SUCCESS,
-      payload: data.generatedData,
+      payload: data,
     });
   } catch (error) {
     dispatch({
@@ -58,7 +59,7 @@ export const authenticateEmail = (emailData) => async(dispatch) => {
   } catch (error) {
     dispatch({
       type: AUTHENITCATE_EMAIL_PASS_FAIL,
-      payload: error.response.data.message,
+      payload: "An error occurred while validating the email. Please try again after sometime.",
     });
   }
 };

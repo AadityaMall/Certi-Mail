@@ -42,7 +42,7 @@ export const sendMailsReducer = (
         ...state,
         error: null,
         loading: false,
-        responseTable: false,
+        responseTable: null,
       };
     default:
       return state;

@@ -1,6 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
-import React from "react";
 import CertificateUploader from "./Components/Certificate Sender/CertificateSender";
 import NavBar from "./Components/Layout/Navbar";
 import Footer from "./Components/Layout/Footer";
