@@ -70,7 +70,8 @@ const sendEmailWithAttachment = async (
     console.error("Error sending email:", error);
   }
 };
-async function generateEventCertificates(name, templateFile, xCoord, yCoord, fontSize, color, fontFile) {
+
+async function generateEventCertificates(textElements, templateFile, fontFile) {
   try {
     if (!templateFile) return;
 
@@ -90,17 +91,18 @@ async function generateEventCertificates(name, templateFile, xCoord, yCoord, fon
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
     // Draw the name on the PDF at the specified coordinates
-    firstPage.drawText(name, {
-      x: xCoord,
-      y: yCoord,
-      size: fontSize,
-      font: customFont,
-      color: rgb(color.r, color.g, color.b), // Convert to 0-1 range
-    });
-
+    for (const element of textElements) {
+      const { name, xCoord, yCoord, fontSize, color } = element;
+      firstPage.drawText(name, {
+        x: xCoord,
+        y: yCoord,
+        size: fontSize,
+        font: customFont,
+        color: rgb(color.r, color.g, color.b), // Convert to 0-1 range
+      });
+    }
     const modifiedPdfBytes = await pdfDoc.save();
 
-    // Optionally save the file locally
     // fs.writeFileSync("./test.pdf", modifiedPdfBytes);
 
     // Return the modified PDF bytes
