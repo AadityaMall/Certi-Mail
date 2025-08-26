@@ -92,8 +92,8 @@ async function generateEventCertificates(textElements, templateFile, fontFile) {
     const firstPage = pages[0];
     // Draw the name on the PDF at the specified coordinates
     for (const element of textElements) {
-      const { name, xCoord, yCoord, fontSize, color } = element;
-      firstPage.drawText(name, {
+      const { text, xCoord, yCoord, fontSize, color } = element;
+      firstPage.drawText(text, {
         x: xCoord,
         y: yCoord,
         size: fontSize,
