@@ -30,9 +30,4 @@ router.post(
   upload.any(), // Accept any files and form fields
   SendMails
 );
-router.post(
-  "/send-email-with-attachment",
-  upload.any(),
-  SendEmailWithAttachment
-);
 module.exports = router;
