@@ -11,8 +11,8 @@ import {
 } from "./constants";
 
 const api = axios.create({
-  // baseURL: process.env.REACT_APP_API_LINK
-  baseURL:"http://localhost:4000/api/v1"
+  baseURL: process.env.REACT_APP_API_LINK
+  // baseURL:"http://localhost:4000/api/v1"
 });
 
 export const sendCertificates = (certificateData) => async(dispatch) => {
