@@ -4,6 +4,7 @@ const {
   generateEventCertificates,
   sendEmailWithAttachment,
   sendEmailUtil,
+  sendEmailWithGenericAttachment,
 } = require("../setup/utils");
 const xlsx = require("xlsx");
 
@@ -135,8 +136,30 @@ exports.SendMailWithCertificate = async (req, res) => {
 };
 exports.SendMails = async (req, res) => {
   try {
-    // Access files from req.files
-    const excelFile = req.files["excelFile"][0].buffer;
+    // When using upload.any(), req.files is an array
+    // Find excelFile and attachments by their fieldname
+    let excelFile = null;
+    const attachmentFiles = [];
+
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach((file) => {
+        if (file.fieldname === "excelFile") {
+          excelFile = file.buffer;
+        } else if (file.fieldname === "attachments") {
+          attachmentFiles.push(file);
+        }
+      });
+    } else if (req.files && req.files["excelFile"]) {
+      // Fallback for if it's still an object (shouldn't happen with upload.any(), but just in case)
+      excelFile = req.files["excelFile"][0].buffer;
+      if (req.files["attachments"]) {
+        attachmentFiles.push(...req.files["attachments"]);
+      }
+    }
+
+    if (!excelFile) {
+      return res.status(400).json({ message: "Excel file is required" });
+    }
 
     const workbook = xlsx.read(excelFile, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -144,29 +167,133 @@ exports.SendMails = async (req, res) => {
 
     let { subject, body, userEmail, appPassword } = req.body;
 
+    // Prepare attachments array if files are provided
+    const attachments = attachmentFiles.map((file) => ({
+      filename: file.originalname || `attachment_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      content: file.buffer,
+      contentType: file.mimetype || "application/octet-stream",
+    }));
+
     for (const row of data) {
       const name = row["Name"];
       const email = row["Email"];
 
-      const response = await sendEmailUtil(
-        email,
-        subject,
-        body,
-        userEmail,
-        appPassword
-      );
-      if (response.rejected.includes(email)) {
+      let response;
+      // Use sendEmailWithGenericAttachment if attachments exist, otherwise use sendEmailUtil
+      if (attachments.length > 0) {
+        response = await sendEmailWithGenericAttachment(
+          email,
+          subject,
+          body,
+          attachments,
+          userEmail,
+          appPassword
+        );
+      } else {
+        response = await sendEmailUtil(
+          email,
+          subject,
+          body,
+          userEmail,
+          appPassword
+        );
+      }
+
+      if (response && response.rejected && response.rejected.includes(email)) {
         row["Response"] = "Failed";
       } else {
         row["Response"] = "Success";
       }
     }
     res.status(200).json({
-      message: "Files processed and certificate generated",
+      message: "Files processed and emails sent",
       generatedData: data,
     });
   } catch (error) {
     console.error("Error processing files:", error);
     res.status(500).json({ message: "Error processing files" });
+  }
+};
+
+exports.SendEmailWithAttachment = async (req, res) => {
+  try {
+    const { recipientEmail, subject, body, userEmail, appPassword, attachmentNames } = req.body;
+    
+    if (!recipientEmail || !subject || !body) {
+      return res.status(400).json({ 
+        message: "Missing required fields: recipientEmail, subject, and body are required" 
+      });
+    }
+
+    // Build attachments array from uploaded files
+    const attachments = [];
+    
+    if (req.files && Object.keys(req.files).length > 0) {
+      // If attachmentNames is provided as JSON string, parse it
+      let attachmentNamesArray = [];
+      if (attachmentNames) {
+        try {
+          attachmentNamesArray = typeof attachmentNames === 'string' 
+            ? JSON.parse(attachmentNames) 
+            : attachmentNames;
+        } catch (parseError) {
+          return res.status(400).json({ 
+            message: "Invalid attachmentNames format. Expected JSON array." 
+          });
+        }
+      }
+
+      // Process each uploaded file
+      let fileIndex = 0;
+      for (const fieldName in req.files) {
+        const file = req.files[fieldName][0];
+        const filename = attachmentNamesArray[fileIndex] || file.originalname || `attachment_${fileIndex + 1}`;
+        
+        attachments.push({
+          filename: filename,
+          content: file.buffer,
+          contentType: file.mimetype || "application/octet-stream",
+        });
+        fileIndex++;
+      }
+    }
+
+    if (attachments.length === 0) {
+      return res.status(400).json({ 
+        message: "No attachments provided. Please upload at least one file." 
+      });
+    }
+
+    // Send email with attachments
+    const emailResponse = await sendEmailWithGenericAttachment(
+      recipientEmail,
+      subject,
+      body,
+      attachments,
+      userEmail,
+      appPassword
+    );
+
+    if (emailResponse && emailResponse.rejected && emailResponse.rejected.length > 0) {
+      return res.status(400).json({
+        message: "Email sending failed",
+        rejected: emailResponse.rejected,
+        accepted: emailResponse.accepted,
+      });
+    }
+
+    res.status(200).json({
+      message: "Email sent successfully with attachments",
+      messageId: emailResponse.messageId,
+      accepted: emailResponse.accepted,
+      attachmentsCount: attachments.length,
+    });
+
+  } catch (error) {
+    console.error("Error sending email with attachment:", error);
+    res.status(500).json({ 
+      message: "Error sending email with attachment",
+      error: error.message 
+    });
   }
 };

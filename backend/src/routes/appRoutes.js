@@ -3,10 +3,17 @@ const {
   AuthenticateEmailIdAppPassword,
   SendMailWithCertificate,
   SendMails,
+  SendEmailWithAttachment,
 } = require("../controllers/controllers");
 const router = express.Router();
 const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  // Don't throw errors on unexpected fields when using upload.any()
+  fileFilter: (req, file, cb) => {
+    cb(null, true); // Accept all files
+  }
+});
 router.route("/validate-user-email").post(AuthenticateEmailIdAppPassword);
 
 router.post(
@@ -20,7 +27,12 @@ router.post(
 );
 router.post(
   "/send-mails",
-  upload.fields([{ name: "excelFile", maxCount: 1 }]),
+  upload.any(), // Accept any files and form fields
   SendMails
+);
+router.post(
+  "/send-email-with-attachment",
+  upload.any(),
+  SendEmailWithAttachment
 );
 module.exports = router;

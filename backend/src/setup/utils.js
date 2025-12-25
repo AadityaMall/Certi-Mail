@@ -111,6 +111,39 @@ async function generateEventCertificates(textElements, templateFile, fontFile) {
     console.error("Error generating certificate:", error);
   }
 }
+const sendEmailWithGenericAttachment = async (
+  recipientEmail,
+  subject,
+  body,
+  attachments,
+  userEmail,
+  appPassword,
+) => {
+  try {
+    // Configure your SMTP server details
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // Use 'Gmail', 'Yahoo', 'Outlook', or your SMTP server
+      auth: {
+        user: userEmail?userEmail:process.env.SMPT_MAIL, // Replace with your email
+        pass: appPassword?appPassword:process.env.SMPT_PASSWORD, // Replace with your email password or app-specific password
+      },
+    });
+
+    const mailOptions = {
+      from: userEmail? userEmail : process.env.SMPT_MAIL, // Sender address
+      to: recipientEmail, // Recipient address
+      subject: subject,
+      html: body,
+      attachments: attachments || [], // Array of attachment objects
+    };
+    const info = await transporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+};
+
 async function validateEmailCredentials(email, appPassword) {
   const transporter = nodemailer.createTransport({
     service: "gmail", // or other services like Yahoo, Outlook, etc.
@@ -135,4 +168,5 @@ module.exports = {
   generateEventCertificates,
   validateEmailCredentials,
   sendEmailUtil,
+  sendEmailWithGenericAttachment,
 };

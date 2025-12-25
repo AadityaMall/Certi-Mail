@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import FileUploadCSV from "../Layout/FileUploadCSV";
-import { InfoOutlined, MailOutline, TaskAlt } from "@mui/icons-material";
+import FileUploadAttachment from "../Layout/FileUploadAttachment";
+import { InfoOutlined, MailOutline, TaskAlt, AttachFile } from "@mui/icons-material";
 import EmailEditor from "../Layout/EmailEditor";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,6 +11,7 @@ import {
   authenticateEmail,
   clearErrors,
   sendEmails,
+  resetReducers,
 } from "../../Redux/action";
 import Loader from "../Layout/Loader";
 import { DataGrid } from "@mui/x-data-grid";
@@ -18,6 +20,7 @@ const CertificateGenerator = () => {
   const [csvFile, setCsvFile] = useState(null);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [attachmentFiles, setAttachmentFiles] = useState([]);
   const [userEmail, setUserEmail] = useState("");
   const [finaluserEmail, setfinalUserEmail] = useState(null);
   const [userAppPassword, setUserAppPassword] = useState("");
@@ -74,6 +77,12 @@ const CertificateGenerator = () => {
     formData.append("excelFile", csvFile);
     formData.append("subject", subject);
     formData.append("body", body);
+    
+    // Append attachment files if any
+    attachmentFiles.forEach((file) => {
+      formData.append("attachments", file);
+    });
+    
     if (finaluserEmail && finaluserAppPassword) {
       formData.append("userEmail", finaluserEmail);
       formData.append("appPassword", finaluserAppPassword);
@@ -112,6 +121,10 @@ const CertificateGenerator = () => {
     setCsvFile(file);
   };
 
+  const handleAttachmentFilesChange = (files) => {
+    setAttachmentFiles(files);
+  };
+
 
 
   useEffect(() => {
@@ -145,6 +158,7 @@ const CertificateGenerator = () => {
       setfinalUserEmail(userEmail);
     }
   }, [success,userAppPassword,userEmail]);
+
 
   return (
     <>
@@ -214,6 +228,32 @@ const CertificateGenerator = () => {
                           />
                         </Form.Group>
                       </Form>
+                    </div>
+                  </Col>
+                </Row>
+                {/* Optional Attachments Section - Always visible */}
+                <Row className="mt-4">
+                  <Col md={12}>
+                    <div className="p-4 bg-white rounded-lg border-2 border-teal-300 shadow-md">
+                      <h3 className="text-xl md:text-2xl text-teal-500 mb-2 flex items-center">
+                        <AttachFile className="mr-2" />
+                        Optional: Add Attachments
+                      </h3>
+                      {csvFile ? (
+                        <>
+                          <p className="text-gray-600 text-sm mb-4">
+                            Attach files to be sent with all emails (optional)
+                          </p>
+                          <FileUploadAttachment
+                            files={attachmentFiles}
+                            onFilesChange={handleAttachmentFilesChange}
+                          />
+                        </>
+                      ) : (
+                        <p className="text-gray-500 text-sm italic">
+                          Upload a CSV file first to enable attachments
+                        </p>
+                      )}
                     </div>
                   </Col>
                 </Row>
@@ -329,7 +369,7 @@ const CertificateGenerator = () => {
                   onClick={sendCertificateHandler}
                   className="mt-4 min-w-80 max-w-80 px-6 py-2 bg-teal-500 text-white rounded shadow hover:bg-teal-600"
                 >
-                  Send Mail <MailOutline />
+                  Send Mail {attachmentFiles.length > 0 && <AttachFile className="ml-2" />} <MailOutline />
                 </button>
               </Container>
             </>

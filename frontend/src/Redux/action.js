@@ -11,8 +11,8 @@ import {
 } from "./constants";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_LINK
-  // baseURL:"http://localhost:4000/api/v1"
+  // baseURL: process.env.REACT_APP_API_LINK
+  baseURL:"http://localhost:4000/api/v1"
 });
 
 export const sendCertificates = (certificateData) => async(dispatch) => {
@@ -44,6 +44,26 @@ export const sendEmails = (mailData) => async(dispatch) => {
     dispatch({
       type: SEND_CERTIFICATE_MAIL_FAIL,
       payload: error.response.data.message,
+    });
+  }
+};
+
+export const sendEmailWithAttachment = (mailData) => async(dispatch) => {
+  try {
+    dispatch({ type: SEND_CERTIFICATE_MAIL_REQUEST });
+    const { data } = await api.post("/send-email-with-attachment", mailData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    dispatch({
+      type: SEND_CERTIFICATE_MAIL_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: SEND_CERTIFICATE_MAIL_FAIL,
+      payload: error.response?.data?.message || "Error sending email with attachment",
     });
   }
 };
